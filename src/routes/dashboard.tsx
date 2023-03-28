@@ -9,11 +9,18 @@ import type { ContractData, JsonInterface } from "~/types";
 const [values, setValues] = createSignal<string[]>([]);
 const [output, setOutput] = createSignal("")
 
+interface MethodCall {
+  method: string,
+  address: string,
+  params: string[],
+  abi: string,
+  contractAddress: string
+}
+
 export default function Dashboard() {
-  const { account } = useUserData()
 
   const { contractDetails } = useContractData()
-
+  const { account } = useUserData()
   // const [contractDetails, setContractDetails] = createSignal({
   //   "address": "0xE5d90332D5CFFb58c022fC89A7C75DB2106a8e2c",
   //   "jsonInterface": [
@@ -79,6 +86,8 @@ export default function Dashboard() {
   //   ]
   // })
 
+
+
   let inputElements: NodeListOf<HTMLInputElement>;
 
   onMount(() => {
@@ -87,17 +96,21 @@ export default function Dashboard() {
 
   const Button: Component<JsonInterface> = (props) => {
     const handleClick = (e) => {
-      const obj: {
-        method: string,
-        address: string,
-        params: string[]
-      } = {
+      const obj: MethodCall = {
         method: [e.target.name] as unknown as string,
         address: "",
-        params: []
+        params: [],
+        abi: "",
+        contractAddress: ""
       };
+
       obj.method = e.target.name
       obj.address = account()
+      obj.abi = JSON.stringify(contractDetails().jsonInterface)
+      obj.contractAddress = contractDetails().address
+
+
+
       inputElements.forEach((el) => {
         if (el.name == e.target.name) {
           obj.params.push(el.value)
@@ -131,7 +144,7 @@ export default function Dashboard() {
 
 
   const setterFunctions = contractDetails().jsonInterface.filter((el) => el.type == "function" && ["nonpayable", "payable"].includes(el.stateMutability))
-  const getterFunctions = contractDetails().jsonInterface.filter((el) => el.type == "function" && ["view"].includes(el.stateMutability))
+  const getterFunctions = contractDetails().jsonInterface.filter((el) => el.type == "function" && ["view", "pure"].includes(el.stateMutability))
 
 
   // let categories = contractDetails().jsonInterface.reduce((pre, curr) => ({ ...pre, [curr.name]: [] }), {})
@@ -172,14 +185,18 @@ function handleChange(index: number, event: Event & { currentTarget: HTMLInputEl
   setValues(newValues);
 }
 
-async function handleGet(obj: { method: string, address: string, params: string[] }) {
+async function handleGet(obj: MethodCall) {
+
+
   let res = await axios.post(
     "http://localhost:9789/call", {
     "method": obj.method,
     "address": obj.address,
-    "params[]": obj.params
-  }
-  )
+    "abi": obj.abi,
+    "contractAddress": obj.contractAddress,
+    "params": obj.params
+  })
+
   console.log(res)
   setOutput(res.data)
 }
