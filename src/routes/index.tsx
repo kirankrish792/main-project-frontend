@@ -1,24 +1,30 @@
-import { createSignal, onMount } from "solid-js";
 import { useNavigate } from "solid-start";
 import { useUserData } from "~/store";
 
-// export const [userAccount, setUserAccount] = createSignal<string>("")
+declare global {
+  interface Window {
+    ethereum?: any;
+  }
+}
 
 export default function Home() {
 
   const navigator = useNavigate()
 
-  const {account,setAccount} = useUserData()
+  const { setAccount } = useUserData()
 
-  onMount(()=>setAccount("0xad772a97E1d41C24B88c46B462D2970F438b02ee"))
+  const handleLogin = async () => {
+
+    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' })
+    if (accounts.length > 0) {
+      setAccount(accounts[0])
+      navigator("/upload")
+    }
+  }
 
   return (
     <main>
-      <div>Account : {account()}</div>
-      {/* <input type="text" onInput={(e) => setUserAccount(e.currentTarget.value)} value={userAccount()} /> */}
-      <button onClick={() => navigator("/upload")}>Login</button>
+      <button onClick={handleLogin}>Login</button>
     </main>
   )
-
-
 }

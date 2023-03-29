@@ -1,12 +1,10 @@
 import axios from "axios";
-import { Component, createSignal, For, onMount, Show, Switch } from "solid-js";
+import { Component, createSignal, For, JSX, onMount, Show, Switch } from "solid-js";
 import { Form } from "solid-start/data/Form";
 import { useContractData, useUserData } from "~/store";
 
 import type { ContractData, JsonInterface } from "~/types";
 
-// const [address, setAddress] = createSignal("")
-const [values, setValues] = createSignal<string[]>([]);
 const [output, setOutput] = createSignal("")
 
 interface MethodCall {
@@ -21,72 +19,6 @@ export default function Dashboard() {
 
   const { contractDetails } = useContractData()
   const { account } = useUserData()
-  // const [contractDetails, setContractDetails] = createSignal({
-  //   "address": "0xE5d90332D5CFFb58c022fC89A7C75DB2106a8e2c",
-  //   "jsonInterface": [
-  //     {
-  //       "inputs": [
-  //         {
-  //           "internalType": "address",
-  //           "name": "",
-  //           "type": "address"
-  //         }
-  //       ],
-  //       "name": "balances",
-  //       "outputs": [
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "totalBalance",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "numDeposits",
-  //           "type": "uint256"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "numWithdrawals",
-  //           "type": "uint256"
-  //         }
-  //       ],
-  //       "stateMutability": "view",
-  //       "type": "function",
-  //       "constant": true,
-  //       "signature": "0x27e235e3"
-  //     },
-  //     {
-  //       "inputs": [],
-  //       "name": "depositeMoney",
-  //       "outputs": [],
-  //       "stateMutability": "payable",
-  //       "type": "function",
-  //       "payable": true,
-  //       "signature": "0x3f925f7a"
-  //     },
-  //     {
-  //       "inputs": [
-  //         {
-  //           "internalType": "address payable",
-  //           "name": "_to",
-  //           "type": "address"
-  //         },
-  //         {
-  //           "internalType": "uint256",
-  //           "name": "_amount",
-  //           "type": "uint256"
-  //         }
-  //       ],
-  //       "name": "withdrawMoney",
-  //       "outputs": [],
-  //       "stateMutability": "nonpayable",
-  //       "type": "function",
-  //       "signature": "0xf274c897"
-  //     }
-  //   ]
-  // })
-
-
 
   let inputElements: NodeListOf<HTMLInputElement>;
 
@@ -95,26 +27,19 @@ export default function Dashboard() {
   })
 
   const Button: Component<JsonInterface> = (props) => {
-    const handleClick = (e) => {
+    const handleClick: JSX.EventHandler<HTMLButtonElement, Event> = (e) => {
       const obj: MethodCall = {
-        method: [e.target.name] as unknown as string,
-        address: "",
+        method: e.currentTarget.name,
+        address: account(),
         params: [],
-        abi: "",
-        contractAddress: ""
+        abi: JSON.stringify(contractDetails().jsonInterface),
+        contractAddress: contractDetails().address
       };
 
-      obj.method = e.target.name
-      obj.address = account()
-      obj.abi = JSON.stringify(contractDetails().jsonInterface)
-      obj.contractAddress = contractDetails().address
-
-
-
-      inputElements.forEach((el) => {
-        if (el.name == e.target.name) {
-          obj.params.push(el.value)
-          el.value = ""
+      inputElements.forEach((item) => {
+        if (item.name == e.currentTarget.name) {
+          obj.params.push(item.value)
+          item.value = ""
         }
       })
       handleGet(obj)
@@ -132,7 +57,7 @@ export default function Dashboard() {
                   <label>
                     {el.name}
                   </label>
-                  <input type="text" name={props.name} placeholder={el.type} onInput={(e) => handleChange(index(), e)} />
+                  <input type="text" name={props.name} placeholder={el.type} />
                 </>
               )
             }
@@ -143,8 +68,8 @@ export default function Dashboard() {
   }
 
 
-  const setterFunctions = contractDetails().jsonInterface.filter((el) => el.type == "function" && ["nonpayable", "payable"].includes(el.stateMutability))
-  const getterFunctions = contractDetails().jsonInterface.filter((el) => el.type == "function" && ["view", "pure"].includes(el.stateMutability))
+  const setterFunctions = contractDetails().jsonInterface.filter((el: JsonInterface) => el.type == "function" && ["nonpayable", "payable"].includes(el.stateMutability))
+  const getterFunctions = contractDetails().jsonInterface.filter((el: JsonInterface) => el.type == "function" && ["view", "pure"].includes(el.stateMutability))
 
 
   // let categories = contractDetails().jsonInterface.reduce((pre, curr) => ({ ...pre, [curr.name]: [] }), {})
@@ -153,8 +78,7 @@ export default function Dashboard() {
     <>
       <h2>Contract Address : {contractDetails().address}</h2>
       <hr />
-      {account}
-      {/* <div>Address : <input type="text" onInput={(e) => setAddress(e.currentTarget.value)} value={address()} /></div> */}
+      User Account : {account}
       <h3>Functions</h3>
       <h4>Getter Function</h4>
       <For each={getterFunctions}>
@@ -170,19 +94,9 @@ export default function Dashboard() {
       </For>
       <hr />
       <h3>Output</h3>
-      <div>{JSON.stringify(output())}</div>
-      <div>{values()!.toString()}</div>
+      <pre>{JSON.stringify(output(), null, 4)}</pre>
     </>
   )
-}
-
-
-
-
-function handleChange(index: number, event: Event & { currentTarget: HTMLInputElement }) {
-  const newValues = [...values()!];
-  newValues[index] = event.currentTarget.value;
-  setValues(newValues);
 }
 
 async function handleGet(obj: MethodCall) {
@@ -196,7 +110,5 @@ async function handleGet(obj: MethodCall) {
     "contractAddress": obj.contractAddress,
     "params": obj.params
   })
-
-  console.log(res)
   setOutput(res.data)
 }
