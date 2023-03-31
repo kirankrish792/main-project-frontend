@@ -1,6 +1,7 @@
 import axios from "axios";
-import { createSignal, JSX, Match, Show, Switch } from "solid-js";
+import { createSignal, JSX, Match, Switch } from "solid-js";
 import { useNavigate } from "solid-start";
+import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
 
 export default function Upload() {
@@ -61,17 +62,18 @@ export default function Upload() {
   }
 
   return (
-    <main>
+    <main class="flex flex-col items-center">
+      <NavBar/>
       <div>Account : {account}</div>
       {/* <input type="text" name="account" onInput={handleAccountChange} value={account()}/> */}
       <Switch>
         <Match when={!abi()}>
-          <textarea name="" id="" cols="30" rows="10" onInput={handleContractChange} value={contract()} />
-          <button onClick={handleCompile}>Compile</button>
+          <textarea name="" id="" class="my-4 text-black p-2 w-full max-w-[768px]" rows={20} cols={20} onInput={handleContractChange} value={contract()} placeholder="// Code for smart contract"/>
+          <button onClick={handleCompile} class="bg-slate-700 py-2 px-4 rounded-lg">Compile</button>
         </Match>
         <Match when={abi()}>
-          <div>Contract Compiled Sucessfully</div>
-          <button onClick={handleDeploy}>Deploy</button>
+          <div class="py-8">Contract Compiled Sucessfully</div>
+          <button onClick={handleDeploy} class="bg-slate-700 py-2 px-4 rounded-lg">Deploy</button>
         </Match>
       </Switch>
     </main>

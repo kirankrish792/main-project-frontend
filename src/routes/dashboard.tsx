@@ -1,30 +1,38 @@
 import axios from "axios";
-import { Component, createSignal, For, JSX, onMount, Show, Switch } from "solid-js";
-import { Form } from "solid-start/data/Form";
+import {
+  Component,
+  createSignal,
+  For,
+  JSX,
+  lazy,
+  onMount,
+  Show,
+  Switch,
+} from "solid-js";
+import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
 
 import type { ContractData, JsonInterface } from "~/types";
 
-const [output, setOutput] = createSignal("")
+const [output, setOutput] = createSignal("");
 
 interface MethodCall {
-  method: string,
-  address: string,
-  params: string[],
-  abi: string,
-  contractAddress: string
+  method: string;
+  address: string;
+  params: string[];
+  abi: string;
+  contractAddress: string;
 }
 
 export default function Dashboard() {
-
-  const { contractDetails } = useContractData()
-  const { account } = useUserData()
+  const { contractDetails } = useContractData();
+  const { account } = useUserData();
 
   let inputElements: NodeListOf<HTMLInputElement>;
 
   onMount(() => {
-    inputElements = document.querySelectorAll("input[type='text']")
-  })
+    inputElements = document.querySelectorAll("input[type='text']");
+  });
 
   const Button: Component<JsonInterface> = (props) => {
     const handleClick: JSX.EventHandler<HTMLButtonElement, Event> = (e) => {
@@ -33,82 +41,101 @@ export default function Dashboard() {
         address: account(),
         params: [],
         abi: JSON.stringify(contractDetails().jsonInterface),
-        contractAddress: contractDetails().address
+        contractAddress: contractDetails().address,
       };
 
       inputElements.forEach((item) => {
         if (item.name == e.currentTarget.name) {
-          obj.params.push(item.value)
-          item.value = ""
+          obj.params.push(item.value);
+          item.value = "";
         }
-      })
-      handleGet(obj)
-    }
+      });
+      handleGet(obj);
+    };
 
     return (
       <div>
-        <button onClick={handleClick} name={props.name}>{props.name}</button>
+        <button
+          onClick={handleClick}
+          name={props.name}
+          class={`${
+            props.func == "getter" ? " bg-emerald-700" : " bg-orange-600"
+          } rounded-lg px-4 py-2 my-2`}
+        >
+          {props.name}
+        </button>
         <Show when={props.inputs.length > 0}>
           <For each={props.inputs}>
-            {
-              (el, index) => (
-                <>
-                  <br />
-                  <label>
-                    {el.name}
-                  </label>
-                  <input type="text" name={props.name} placeholder={el.type} />
-                </>
-              )
-            }
+            {(el) => (
+              <div class="px-4">
+                <label>{el.name}</label>
+                <input
+                  type="text"
+                  name={props.name}
+                  placeholder={el.type}
+                  class=" px-1 m-2 py-3 bg-gray-800 rounded-lg"
+                />
+              </div>
+            )}
           </For>
         </Show>
       </div>
-    )
-  }
+    );
+  };
 
-
-  const setterFunctions = contractDetails().jsonInterface.filter((el: JsonInterface) => el.type == "function" && ["nonpayable", "payable"].includes(el.stateMutability))
-  const getterFunctions = contractDetails().jsonInterface.filter((el: JsonInterface) => el.type == "function" && ["view", "pure"].includes(el.stateMutability))
-
+  const setterFunctions = contractDetails().jsonInterface.filter(
+    (el: JsonInterface) =>
+      el.type == "function" &&
+      ["nonpayable", "payable"].includes(el.stateMutability)
+  );
+  const getterFunctions = contractDetails().jsonInterface.filter(
+    (el: JsonInterface) =>
+      el.type == "function" && ["view", "pure"].includes(el.stateMutability)
+  );
 
   // let categories = contractDetails().jsonInterface.reduce((pre, curr) => ({ ...pre, [curr.name]: [] }), {})
 
   return (
-    <>
-      <h2>Contract Address : {contractDetails().address}</h2>
-      <hr />
-      User Account : {account}
-      <h3>Functions</h3>
-      <h4>Getter Function</h4>
-      <For each={getterFunctions}>
-        {
-          (item) => (<Button {...item} />)
-        }
-      </For>
-      <h4>Setter Function</h4>
-      <For each={setterFunctions}>
-        {
-          (item) => (<Button {...item} />)
-        }
-      </For>
-      <hr />
-      <h3>Output</h3>
-      <pre>{JSON.stringify(output(), null, 4)}</pre>
-    </>
-  )
+    <main>
+      <NavBar />
+      <div class="p-4">
+        <div class="font-bold text-2xl">
+          <div>Contract Address : </div>
+          <div>{contractDetails().address}</div>
+        </div>
+        <hr />
+        <div class="font-bold text-xl py-4">
+          <div>User Account : </div>
+          <div>{account}</div>
+        </div>
+        <h3 class="text-lg font-bold">Functions</h3>
+        <div class="my-4">
+          <h4>Getter Function</h4>
+          <For each={getterFunctions}>
+            {(item) => <Button {...item} func="getter" />}
+          </For>
+        </div>
+        <div class="my-4">
+          <h4>Setter Function</h4>
+          <For each={setterFunctions}>
+            {(item) => <Button {...item} func="setter" />}
+          </For>
+        </div>
+        <hr />
+        <h3 class="text-xl py-4 font-bold">Output</h3>
+        <pre>{JSON.stringify(output(), null, 4)}</pre>
+      </div>
+    </main>
+  );
 }
 
 async function handleGet(obj: MethodCall) {
-
-
-  let res = await axios.post(
-    "http://localhost:9789/call", {
-    "method": obj.method,
-    "address": obj.address,
-    "abi": obj.abi,
-    "contractAddress": obj.contractAddress,
-    "params": obj.params
-  })
-  setOutput(res.data)
+  let res = await axios.post("http://localhost:9789/call", {
+    method: obj.method,
+    address: obj.address,
+    abi: obj.abi,
+    contractAddress: obj.contractAddress,
+    params: obj.params,
+  });
+  setOutput(res.data);
 }
