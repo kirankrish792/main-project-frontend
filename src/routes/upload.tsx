@@ -37,7 +37,7 @@ export default function Upload() {
 
     if (res.status == 200) {
       setContractDetails(() => res.data.options)
-      navigator("/dashboard")
+      navigator("/contractInteraction")
     }
   };
 
