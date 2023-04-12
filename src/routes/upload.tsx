@@ -3,79 +3,110 @@ import { createSignal, JSX, Match, Switch } from "solid-js";
 import { useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
+import { Editor } from "../../../solid-monaco/src/index";
 
 export default function Upload() {
+  const navigator = useNavigate();
+  const { setContractDetails } = useContractData();
 
-  const navigator = useNavigate()
-  const { setContractDetails } = useContractData()
+  const [abi, setAbi] = createSignal();
+  const [byteCode, setByteCode] = createSignal();
+  const [contractName, setContractName] = createSignal();
 
-  
-  const [abi, setAbi] = createSignal()
-  const [byteCode, setByteCode] = createSignal()
+  const baseUrl = "http://127.0.0.1:9789";
 
-  const baseUrl = "http://127.0.0.1:9789"
+  const { account } = useUserData();
 
+  const [contract, setContract] = createSignal("//Write Smart Contract Here");
 
-  const { account } = useUserData()
-  const [contract, setContract] = createSignal("");
-
-  const handleContractChange: JSX.EventHandler<HTMLTextAreaElement, Event> = (event) => {
-    setContract(() => event.currentTarget.value);
+  const handleContractChange = (event: any) => {
+    if (typeof event == "string") {
+      setContract(() => event);
+    }
   };
 
   const handleDeploy = async (event: Event) => {
     event.preventDefault();
 
-    const res = await axios.post(
-      `${baseUrl}/deploy`,
-      {
-        "account": account(),
-        "bytecode": byteCode(),
-        "abi": JSON.stringify(abi())
-      }
-    );
+    const res = await axios.post(`${baseUrl}/deploy`, {
+      account: account(),
+      bytecode: byteCode(),
+      abi: JSON.stringify(abi()),
+    });
 
     if (res.status == 200) {
-      setContractDetails(() => res.data.options)
-      navigator("/contractInteraction")
+      setContractDetails(() => ({
+        ...res.data.options,
+        contractName: contractName(),
+      }));
+      navigator("/contractInteraction");
     }
   };
 
-
-
   const handleCompile = async (event: Event) => {
-
     // setContractName(()=>pickContractName.exec(contract()))
     event.preventDefault();
-    const res = await axios.post(
-      `${baseUrl}/compile`,
-      {
-        "solidityCode": contract()
-      }
-    );
+    const res = await axios.post(`${baseUrl}/compile`, {
+      solidityCode: contract(),
+    });
     if (res.status == 200) {
       if (res.data) {
+        setContractName(res.data.contractName);
         setAbi(res.data.abi);
         setByteCode(res.data.bytecode);
       }
     }
-  }
+  };
 
   return (
-    <main class="flex flex-col items-center">
-      <NavBar/>
-      <div>Account : {account}</div>
-      {/* <input type="text" name="account" onInput={handleAccountChange} value={account()}/> */}
-      <Switch>
-        <Match when={!abi()}>
-          <textarea name="" id="" class="my-4 text-black p-2 w-full max-w-[768px]" rows={20} cols={20} onInput={handleContractChange} value={contract()} placeholder="// Code for smart contract"/>
-          <button onClick={handleCompile} class="bg-slate-700 py-2 px-4 rounded-lg">Compile</button>
-        </Match>
-        <Match when={abi()}>
-          <div class="py-8">Contract Compiled Sucessfully</div>
-          <button onClick={handleDeploy} class="bg-slate-700 py-2 px-4 rounded-lg">Deploy</button>
-        </Match>
-      </Switch>
+    <main class="">
+      <NavBar />
+      <div class="p-4">
+        <div>Account : {account}</div>
+        <Switch>
+          <Match when={!abi()}>
+            <div class="flex">
+              <div class="w-[20%]">
+                <button
+                  onClick={handleCompile}
+                  class="bg-slate-700 py-2 px-4 rounded-lg"
+                >
+                  Compile
+                </button>
+              </div>
+              <div class="w-[80%]">
+                <Editor
+                  class=""
+                  value={() => contract()}
+                  onChange={handleContractChange}
+                  style={{
+                    "max-height": "100vh",
+                    height: "80vh",
+                    width: "100%",
+                    border: "solid grey 2px",
+                  }}
+                  options={{
+                    theme: "vs",
+                    language: "sol",
+                    minimap: {
+                      enabled: false,
+                    },
+                  }}
+                />
+              </div>
+            </div>
+          </Match>
+          <Match when={abi()}>
+            <div class="py-8">Contract Compiled Sucessfully</div>
+            <button
+              onClick={handleDeploy}
+              class="bg-slate-700 py-2 px-4 rounded-lg"
+            >
+              Deploy
+            </button>
+          </Match>
+        </Switch>
+      </div>
     </main>
   );
 }

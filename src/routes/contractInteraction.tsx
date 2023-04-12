@@ -1,18 +1,10 @@
 import axios from "axios";
-import {
-  Component,
-  createSignal,
-  For,
-  JSX,
-  lazy,
-  onMount,
-  Show,
-  Switch,
-} from "solid-js";
+import { Component, createSignal, For, JSX, onMount, Show } from "solid-js";
+import {  useSearchParams } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
 
-import type { ContractData, JsonInterface } from "~/types";
+import type { JsonInterface } from "~/types";
 
 const [output, setOutput] = createSignal("");
 
@@ -25,6 +17,11 @@ interface MethodCall {
 }
 
 export default function ContractInteraction() {
+
+  const params = useSearchParams()
+  
+  console.log(params[1])
+
   const { contractDetails } = useContractData();
   const { account } = useUserData();
 
@@ -34,7 +31,7 @@ export default function ContractInteraction() {
     inputElements = document.querySelectorAll("input[type='text']");
   });
 
-  const Button: Component<JsonInterface & {func:string}> = (props) => {
+  const Button: Component<JsonInterface & { func: string }> = (props) => {
     const handleClick: JSX.EventHandler<HTMLButtonElement, Event> = (e) => {
       const obj: MethodCall = {
         method: e.currentTarget.name,
@@ -95,18 +92,21 @@ export default function ContractInteraction() {
 
   // let categories = contractDetails().jsonInterface.reduce((pre, curr) => ({ ...pre, [curr.name]: [] }), {})
 
+  console.log(contractDetails());
+
   return (
     <main>
       <NavBar />
       <div class="font-bold text-2xl">
-        <div>Contract Address : </div>
-        <div>{contractDetails().address}</div>
+        <div>
+          <div>Contract Name:{contractDetails().contractName}</div>
+        </div>
+        <div>Contract Address : {contractDetails().address}</div>
       </div>
       <div class=" lg:flex">
         <div class="p-4">
           <div class="font-bold text-xl py-4">
-            <div>User Account : </div>
-            <div>{account}</div>
+            <div>User Account : {account}</div>
           </div>
           <h3 class="text-lg font-bold">Functions</h3>
           <div class="my-4">

@@ -1,0 +1,113 @@
+[
+  {
+    "contractName": "Contract1",
+    "abi": [
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getBalance",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_value",
+            "type": "uint256"
+          }
+        ],
+        "name": "setBalance",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "contractAddress": "0xabcdef1234567890abcdef1234567890abcdef1"
+  },
+  {
+    "contractName": "Contract2",
+    "abi": [
+      {
+        "constant": true,
+        "inputs": [],
+        "name": "getName",
+        "outputs": [
+          {
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_name",
+            "type": "string"
+          }
+        ],
+        "name": "setName",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "contractAddress": "0x1234567890abcdef1234567890abcdef1234567"
+  },
+  {
+    "contractName": "Contract3",
+    "abi": [
+      {
+        "constant": true,
+        "inputs": [
+          {
+            "name": "_index",
+            "type": "uint256"
+          }
+        ],
+        "name": "getValue",
+        "outputs": [
+          {
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "constant": false,
+        "inputs": [
+          {
+            "name": "_index",
+            "type": "uint256"
+          },
+          {
+            "name": "_value",
+            "type": "uint256"
+          }
+        ],
+        "name": "setValue",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ],
+    "contractAddress": "0x4567890abcdef1234567890abcdef123456789a"
+  }
+]

@@ -1,5 +1,5 @@
 // @refresh reload
-import { createContext, Suspense } from "solid-js";
+import { Suspense } from "solid-js";
 import {
   Body,
   ErrorBoundary,
@@ -27,7 +27,7 @@ export default function Root() {
         <Meta charset="utf-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>
-      <Body class=" bg-black text-white">
+      <Body>
         <Suspense>
           <ErrorBoundary>
             <UserDataProvider>

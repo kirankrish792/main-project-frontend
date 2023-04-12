@@ -17,7 +17,9 @@ export default function Home() {
     const accounts = await window.ethereum.request({
       method: "eth_requestAccounts",
     });
+
     if (accounts.length > 0) {
+      localStorage.setItem("account",accounts[0]);
       setAccount(accounts[0]);
       navigator("/dashboard");
     }
