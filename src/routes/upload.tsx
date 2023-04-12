@@ -3,7 +3,7 @@ import { createSignal, JSX, Match, Switch } from "solid-js";
 import { useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
-import { Editor } from "../../../solid-monaco/src/index";
+import { Editor } from "~/components/createMonaco";
 
 export default function Upload() {
   const navigator = useNavigate();
