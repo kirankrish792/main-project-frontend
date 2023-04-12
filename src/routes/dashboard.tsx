@@ -1,14 +1,13 @@
+import axios from "axios";
 import { For, createResource } from "solid-js";
 import { A, useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 
 export default function Dashboard() {
-  const url = new URL("/contractInteraction",location.origin);
   const navigator = useNavigate();
   const fetcher = async () => {
-    const res = await fetch("/api/data");
-    const data = await res.json();
-    return data;
+    const res = await axios(import.meta.env.VITE_BASE_URL + "/contracts");
+    return res.data;
   };
   const [contractList] = createResource(fetcher);
 
@@ -25,10 +24,9 @@ export default function Dashboard() {
         <ul>
           <For each={contractList()}>
             {(contract) => {
-              url.searchParams.set("contractAddress", contract.contractAddress);
               return (
                 <div>
-                  <A href={url.toString()}>
+                  <A href={"/contractInteraction/" + contract.contractAddress}>
                     <button>{contract.contractName}</button>
                   </A>
                 </div>

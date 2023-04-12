@@ -13,8 +13,6 @@ export default function Upload() {
   const [byteCode, setByteCode] = createSignal();
   const [contractName, setContractName] = createSignal();
 
-  const baseUrl = "http://127.0.0.1:9789";
-
   const { account } = useUserData();
 
   const [contract, setContract] = createSignal("//Write Smart Contract Here");
@@ -28,10 +26,13 @@ export default function Upload() {
   const handleDeploy = async (event: Event) => {
     event.preventDefault();
 
-    const res = await axios.post(`${baseUrl}/deploy`, {
+    console.log(account(),contractName(),abi())
+
+    const res = await axios.post(`http://localhost:9789/deploy`, {
       account: account(),
       bytecode: byteCode(),
       abi: JSON.stringify(abi()),
+      contractName:contractName()
     });
 
     if (res.status == 200) {
@@ -46,7 +47,7 @@ export default function Upload() {
   const handleCompile = async (event: Event) => {
     // setContractName(()=>pickContractName.exec(contract()))
     event.preventDefault();
-    const res = await axios.post(`${baseUrl}/compile`, {
+    const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/compile`, {
       solidityCode: contract(),
     });
     if (res.status == 200) {

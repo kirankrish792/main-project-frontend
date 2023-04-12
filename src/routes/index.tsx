@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useUserData } from "~/store";
@@ -11,7 +12,16 @@ declare global {
 export default function Home() {
   const navigator = useNavigate();
 
-  const { setAccount } = useUserData();
+  const { account, setAccount } = useUserData();
+
+  async function login(address: string) {
+    let res = await axios.post(`${import.meta.env.VITE_BASE_URL}/userLoggin`, {
+      address,
+    });
+    if (res.data.login) {
+      navigator("/dashboard");
+    }
+  }
 
   const handleLogin = async () => {
     const accounts = await window.ethereum.request({
@@ -19,9 +29,9 @@ export default function Home() {
     });
 
     if (accounts.length > 0) {
-      localStorage.setItem("account",accounts[0]);
+      localStorage.setItem("account", accounts[0]);
       setAccount(accounts[0]);
-      navigator("/dashboard");
+      login(account());
     }
   };
 
