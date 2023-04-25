@@ -20,7 +20,6 @@ export const Editor = (
     }
   });
   onMount(() => {
-    console.log(monacoEl);
     if (monacoEl && !editor) {
       editor = monaco.editor.create(monacoEl!, props.options, props.overrides);
       editor.onDidChangeModelContent((e) => {
