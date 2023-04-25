@@ -19,3 +19,14 @@ export interface Input {
   name: string;
   type: string;
 }
+
+export enum Permission {
+  all = "all",
+  read = "read",
+  write = "write"
+}
+
+export enum Role {
+  admin = "admin",
+  user = "user",
+}
