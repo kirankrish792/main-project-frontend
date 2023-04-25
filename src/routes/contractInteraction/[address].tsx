@@ -1,10 +1,20 @@
 import axios from "axios";
-import { Component, createResource, createSignal, For, JSX, onMount, Show } from "solid-js";
-import { json, useParams, useSearchParams } from "solid-start";
+import {
+  Component,
+  createResource,
+  createSignal,
+  For,
+  JSX,
+  onMount,
+  Resource,
+  Show,
+} from "solid-js";
+import { useParams } from "solid-start";
 import NavBar from "~/components/NavBar";
-import { useContractData, useUserData } from "~/store";
+import { getAccount } from "~/lib/getAccount";
+import { useUserData } from "~/store";
 
-import type { JsonInterface } from "~/types";
+import type { ContractData, JsonInterface } from "~/types";
 
 const [output, setOutput] = createSignal("");
 
@@ -16,20 +26,49 @@ interface MethodCall {
   contractAddress: string;
 }
 
-export default function ContractInteraction() {
+interface Contract {
+  contractName: string;
+  abi: JsonInterface;
+  contractAddress: string;
+  owner: {
+    accountAddress: string;
+    ownedContracts: string[];
+    forkedContracts: string[];
+  };
+}
+
+
+export default function Wrapper() {
   const { address } = useParams();
+  const { account } = useUserData();
 
   const fetcher = async () => {
+    if (account() == "") {
+      await getAccount()
+    }
     const res = await axios(
       import.meta.env.VITE_BASE_URL + "/contracts/" + address
     );
-    console.log(res.data)
     return res.data;
   };
-  const [contractDetails] = createResource(fetcher);
+  const [contractDetails] = createResource<Contract>(fetcher);
 
+  return (
+    <Show when={!contractDetails.loading} fallback={<div>Loading...</div>}>
+      <ContractInteraction contract={contractDetails} />
+    </Show>
+  );
+}
+
+const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
+  props
+) => {
   // const { contractDetails } = useContractData();
+  const { contract } = props;
+  console.log(contract());
+
   const { account } = useUserData();
+
 
   let inputElements: NodeListOf<HTMLInputElement>;
 
@@ -37,16 +76,14 @@ export default function ContractInteraction() {
     inputElements = document.querySelectorAll("input[type='text']");
   });
 
-  
-
-  const Button: Component<JsonInterface & { func: string }> = (props) => {
+  const Button: Component<any> = (props) => {
     const handleClick: JSX.EventHandler<HTMLButtonElement, Event> = (e) => {
       const obj: MethodCall = {
         method: e.currentTarget.name,
         address: account(),
         params: [],
-        abi: contractDetails.abi,
-        contractAddress: contractDetails.address,
+        abi: JSON.stringify(contract()!.abi),
+        contractAddress: contract()!.contractAddress,
       };
 
       inputElements.forEach((item) => {
@@ -88,30 +125,26 @@ export default function ContractInteraction() {
     );
   };
 
-  const ABI = JSON.parse(contractDetails.abi)
-
-  const setterFunctions = ABI.filter(
+  const setterFunctions = contract()!.abi.filter(
     (el: JsonInterface) =>
       el.type == "function" &&
       ["nonpayable", "payable"].includes(el.stateMutability)
   );
-  const getterFunctions = ABI.filter(
+  const getterFunctions = contract()!.abi.filter(
     (el: JsonInterface) =>
       el.type == "function" && ["view", "pure"].includes(el.stateMutability)
   );
 
-  // let categories = contractDetails().jsonInterface.reduce((pre, curr) => ({ ...pre, [curr.name]: [] }), {})
-
-  console.log(contractDetails());
+  console.log(props["contract"]());
 
   return (
     <main>
       <NavBar />
       <div class="font-bold text-2xl">
         <div>
-          <div>Contract Name:{contractDetails.contractName}</div>
+          <div>Contract Name:{props["contract"]()!.contractName}</div>
         </div>
-        <div>Contract Address : {contractDetails.address}</div>
+        <div>Contract Address : {props["contract"]()!.contractAddress}</div>
       </div>
       <div class=" lg:flex">
         <div class="p-4">
@@ -140,7 +173,7 @@ export default function ContractInteraction() {
       </div>
     </main>
   );
-}
+};
 
 async function handleGet(obj: MethodCall) {
   let res = await axios.post("http://localhost:9789/call", {

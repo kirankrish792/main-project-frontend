@@ -1,9 +1,10 @@
 import axios from "axios";
-import { createSignal, JSX, Match, Switch } from "solid-js";
+import { createEffect, createSignal, JSX, Match, Show, Switch } from "solid-js";
 import { useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
 import { Editor } from "~/components/createMonaco";
+import { getAccount } from "~/lib/getAccount";
 
 export default function Upload() {
   const navigator = useNavigate();
@@ -14,6 +15,12 @@ export default function Upload() {
   const [contractName, setContractName] = createSignal();
 
   const { account } = useUserData();
+
+  createEffect(async () => {
+    if (account() == "") {
+      await getAccount();
+    }
+  });
 
   const [contract, setContract] = createSignal("//Write Smart Contract Here");
 
@@ -26,13 +33,13 @@ export default function Upload() {
   const handleDeploy = async (event: Event) => {
     event.preventDefault();
 
-    console.log(account(),contractName(),abi())
+    console.log(account(), contractName(), abi());
 
     const res = await axios.post(`http://localhost:9789/deploy`, {
       account: account(),
       bytecode: byteCode(),
       abi: JSON.stringify(abi()),
-      contractName:contractName()
+      contractName: contractName(),
     });
 
     if (res.status == 200) {
@@ -99,6 +106,18 @@ export default function Upload() {
           </Match>
           <Match when={abi()}>
             <div class="py-8">Contract Compiled Sucessfully</div>
+
+            {/* TO Display the constructor */}
+
+            {/* <Show when={abi().find((el) => el.type == "constructor") != null}>
+              {abi().find((el) => el.type == "constructor")["inputs"][0].name}
+              <input
+                type="text"
+                placeholder={
+                  abi().find((el) => el.type == "constructor")["inputs"][0].type
+                }
+              />
+            </Show> */}
             <button
               onClick={handleDeploy}
               class="bg-slate-700 py-2 px-4 rounded-lg"
