@@ -1,5 +1,13 @@
 import axios from "axios";
-import { createEffect, createSignal, JSX, Match, Show, Switch } from "solid-js";
+import {
+  createEffect,
+  createSignal,
+  JSX,
+  Match,
+  Show,
+  Switch,
+  For,
+} from "solid-js";
 import { useNavigate } from "solid-start";
 import NavBar from "~/components/NavBar";
 import { useContractData, useUserData } from "~/store";
@@ -13,6 +21,8 @@ export default function Upload() {
   const [abi, setAbi] = createSignal();
   const [byteCode, setByteCode] = createSignal();
   const [contractName, setContractName] = createSignal();
+  const [error, setError] = createSignal([]);
+  const [warning, setWarning] = createSignal([]);
 
   const { account } = useUserData();
 
@@ -54,16 +64,24 @@ export default function Upload() {
   const handleCompile = async (event: Event) => {
     // setContractName(()=>pickContractName.exec(contract()))
     event.preventDefault();
-    const res = await axios.post(`${import.meta.env.VITE_BASE_URL}/compile`, {
-      solidityCode: contract(),
-    });
-    if (res.status == 200) {
-      if (res.data) {
-        setContractName(res.data.contractName);
-        setAbi(res.data.abi);
-        setByteCode(res.data.bytecode);
-      }
-    }
+    axios
+      .post(`${import.meta.env.VITE_BASE_URL}/compile`, {
+        solidityCode: contract(),
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.data) {
+          const { contractName, abi, bytecode, warning } = res.data;
+          setContractName(contractName);
+          setAbi(abi);
+          setByteCode(bytecode);
+          setWarning(warning);
+        }
+      })
+      .catch((err) => {
+        setError(err.response.data.message);
+        console.log(error());
+      });
   };
 
   return (
@@ -81,6 +99,7 @@ export default function Upload() {
                 >
                   Compile
                 </button>
+                <Show when={warning().length > 0}>{warning()[0]}</Show>
               </div>
               <div class="w-[80%]">
                 <Editor
@@ -89,7 +108,7 @@ export default function Upload() {
                   onChange={handleContractChange}
                   style={{
                     "max-height": "100vh",
-                    height: "80vh",
+                    height: "60vh",
                     width: "100%",
                     border: "solid grey 2px",
                   }}
@@ -101,6 +120,15 @@ export default function Upload() {
                     },
                   }}
                 />
+                <Show when={error().length > 0}>
+                  <For each={error()}>
+                    {(err) => (
+                      <pre class=" text-sm bg-red-600 bg-opacity-30 text-red-500  overflow-scroll">
+                        {err}
+                      </pre>
+                    )}
+                  </For>
+                </Show>
               </div>
             </div>
           </Match>
