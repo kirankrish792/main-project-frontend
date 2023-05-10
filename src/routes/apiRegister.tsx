@@ -40,117 +40,132 @@ const ApiRegister: Component<{}> = (props) => {
   }
 
   return (
-    <main>
+    <main class=" w-screen h-screen ">
       <NavBar />
-      <div>
-        <div>
-          Role
-          <hr />
-          <div>
-            <input
-              type="radio"
-              name="role"
-              id={Role.admin}
-              onChange={() => setRole(Role.admin)}
-            />
-            <label for={Role.admin}>Admin</label>
+      <div class="w-full h-3/4 grid grid-cols-3  place-content-center place-items-center">
+        <div class="w-[360px] shadow-blue-200 shadow-xl border-blue-500 p-10 rounded-xl">
+          <div class="text-center font-medium text-lg">Register API KEY</div>
+          <div class=" my-10">
+            <div>Role</div>
+            <div class=" grid grid-cols-3 my-2">
+              <div>
+                <input
+                  type="radio"
+                  name="role"
+                  id={Role.admin}
+                  onChange={() => setRole(Role.admin)}
+                />
+                <label for={Role.admin}>Admin</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  name="role"
+                  id={Role.user}
+                  onChange={() => setRole(Role.user)}
+                />
+                <label for="user">User</label>
+              </div>
+            </div>
           </div>
-          <div>
-            <input
-              type="radio"
-              name="role"
-              id={Role.user}
-              onChange={() => setRole(Role.user)}
-            />
-            <label for="user">User</label>
-          </div>
-        </div>
-        <Show when={role() != Role.admin}>
-          <div>
-            <div class="">Permission</div>
+          <Show when={role() != Role.admin}>
+            <div class=" my-10">
+              <div class="">Permission</div>
+              <hr />
+              <div class=" grid grid-cols-3 my-2">
+                <div>
+                  <input
+                    type="radio"
+                    name="permission"
+                    id="all"
+                    onChange={() => setPermission(Permission.all)}
+                  />
+                  <label for="all">All</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    name="permission"
+                    id="read"
+                    onChange={() => setPermission(Permission.read)}
+                  />
+                  <label for="read">Read</label>
+                </div>
+                <div>
+                  <input
+                    type="radio"
+                    name="permission"
+                    id="write"
+                    onChange={() => setPermission(Permission.write)}
+                  />
+                  <label for="write">Write</label>
+                </div>
+              </div>
+            </div>
+          </Show>
+          <div class=" my-10">
+            Expires In
             <hr />
-            <div>
-              <input
-                type="radio"
-                name="permission"
-                id="all"
-                onChange={() => setPermission(Permission.all)}
-              />
-              <label for="all">All</label>
-            </div>
-            <div>
-              <input
-                type="radio"
-                name="permission"
-                id="read"
-                onChange={() => setPermission(Permission.read)}
-              />
-              <label for="read">Read</label>
-            </div>
-            <div>
-              <input
-                type="radio"
-                name="permission"
-                id="write"
-                onChange={() => setPermission(Permission.write)}
-              />
-              <label for="write">Write</label>
+            <div class=" grid grid-cols-3 my-2">
+              <div>
+                <input
+                  type="radio"
+                  name="expire"
+                  id="30"
+                  onChange={() => setExpire("30d")}
+                />
+                <label for="30">30 days</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  name="expire"
+                  id="60"
+                  onChange={() => setExpire("60d")}
+                />
+                <label for="60">60 days</label>
+              </div>
+              <div>
+                <input
+                  type="radio"
+                  name="expire"
+                  id="90"
+                  onChange={() => setExpire("90d")}
+                />
+                <label for="90">90 days</label>
+              </div>
             </div>
           </div>
-        </Show>
-        <div>
-          Lifetime
-          <hr />
-          <div>
-            <input
-              type="radio"
-              name="expire"
-              id="30"
-              onChange={() => setExpire("30d")}
-            />
-            <label for="30">30 days</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="expire"
-              id="60"
-              onChange={() => setExpire("60d")}
-            />
-            <label for="60">60 days</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              name="expire"
-              id="90"
-              onChange={() => setExpire("90d")}
-            />
-            <label for="90">90 days</label>
+
+          <div class="flex justify-center">
+            <button
+              class="py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-500"
+              onClick={handleSubmit}
+            >
+              Submit
+            </button>
           </div>
         </div>
 
-        <button
-          class="py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-500"
-          onClick={handleSubmit}
+        <Show
+          when={out()}
+          fallback={
+            <div class=" text-gray-900 text-xl font-bold col-span-2">
+              Your API Key
+            </div>
+          }
         >
-          Submit
-        </button>
+          <div class="flex flex-col items-center col-span-2">
+            <div class=" text-gray-900 text-xl font-bold">Your API Key</div>
+            <div
+              class="mx-4 max-w-[540px] text-justify p-4"
+              style={{ "overflow-wrap": "break-word" }}
+            >
+              {out()}
+            </div>
+          </div>
+        </Show>
       </div>
-      <Show when={out()}>
-        <div>API Key</div>
-        <div class="mx-4" style={{ "word-wrap": "break-word" }}>
-          {out()}
-        </div>
-        <button
-          onClick={() => {
-            navigator.clipboard.writeText(out() || "");
-            alert("copied");
-          }}
-        >
-          Copy
-        </button>
-      </Show>
     </main>
   );
 };

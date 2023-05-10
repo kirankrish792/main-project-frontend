@@ -23,6 +23,7 @@ export default function Upload() {
   const [contractName, setContractName] = createSignal();
   const [error, setError] = createSignal([]);
   const [warning, setWarning] = createSignal([]);
+  const [args, setArgs] = createSignal("");
 
   const { account } = useUserData();
 
@@ -43,10 +44,11 @@ export default function Upload() {
   const handleDeploy = async (event: Event) => {
     event.preventDefault();
 
-    console.log(account(), contractName(), abi());
+    console.log(args());
 
     const res = await axios.post(`http://localhost:9789/deploy`, {
       account: account(),
+      args: args().split(","),
       bytecode: byteCode(),
       abi: JSON.stringify(abi()),
       contractName: contractName(),
@@ -120,15 +122,27 @@ export default function Upload() {
                     },
                   }}
                 />
-                <Show when={error().length > 0}>
-                  <For each={error()}>
-                    {(err) => (
-                      <pre class=" text-sm bg-red-600 bg-opacity-30 text-red-500  overflow-scroll">
-                        {err}
-                      </pre>
-                    )}
-                  </For>
-                </Show>
+
+                <Switch>
+                  <Match
+                    when={error().length > 0 && typeof error() !== "string"}
+                  >
+                    <For each={error()}>
+                      {(err) => (
+                        <pre class=" text-sm bg-red-600 bg-opacity-30 text-red-500  overflow-scroll">
+                          {err}
+                        </pre>
+                      )}
+                    </For>
+                  </Match>
+                  <Match
+                    when={error().length > 0 && typeof error() === "string"}
+                  >
+                    <pre class=" text-sm bg-red-600 bg-opacity-30 text-red-500  overflow-scroll">
+                      {error()}
+                    </pre>
+                  </Match>
+                </Switch>
               </div>
             </div>
           </Match>
@@ -136,16 +150,19 @@ export default function Upload() {
             <div class="py-8">Contract Compiled Sucessfully</div>
 
             {/* TO Display the constructor */}
+            {console.log(abi())}
 
-            {/* <Show when={abi().find((el) => el.type == "constructor") != null}>
-              {abi().find((el) => el.type == "constructor")["inputs"][0].name}
+            <Show when={abi().find((el) => el.type == "constructor") != null}>
+              {abi()?.find((el) => el.type == "constructor")["inputs"][0].name}
               <input
                 type="text"
                 placeholder={
-                  abi().find((el) => el.type == "constructor")["inputs"][0].type
+                  abi()?.find((el) => el.type == "constructor")["inputs"][0]
+                    .type
                 }
+                onChange={(e) => setArgs(e.currentTarget.value)}
               />
-            </Show> */}
+            </Show>
             <button
               onClick={handleDeploy}
               class="bg-slate-700 py-2 px-4 rounded-lg"

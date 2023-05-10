@@ -1,5 +1,6 @@
 import axios from "axios";
 import {
+  Component,
   For,
   Match,
   Show,
@@ -12,11 +13,28 @@ import NavBar from "~/components/NavBar";
 import { getAccount } from "~/lib/getAccount";
 import { useUserData } from "~/store";
 
+import { JsonInterface } from "~/types";
+
+export interface ContractList {
+  accountAddress: string;
+  ownedContracts: Contract[];
+  forkedContracts: Contract[];
+}
+
+export interface Contract {
+  _id: string;
+  contractName: string;
+  abi: JsonInterface;
+  contractAddress: string;
+  owner: string;
+  __v?: number;
+}
+
 export default function Dashboard() {
   const navigator = useNavigate();
   const [owned, setOwned] = createSignal<boolean>(true);
 
-  const fetcher = async () => {
+  const fetcher = async (): Promise<ContractList> => {
     const { account } = useUserData();
     if (account() == "") {
       await getAccount();
@@ -24,6 +42,7 @@ export default function Dashboard() {
     const res = await axios(
       import.meta.env.VITE_BASE_URL + "/users/" + account()
     );
+    console.log(res.data);
     return res.data;
   };
   const [contractList] = createResource(fetcher);
@@ -35,9 +54,40 @@ export default function Dashboard() {
       <NavBar />
 
       <div class="grid grid-cols-10  min-h-[80vh]">
-        <div class=" col-span-3 flex items-center justify-center"> hello</div>
-        <div class="col-span-7">
+        <div class=" col-span-3 flex items-center justify-center">
           <div>
+            <Show when={!contractList.loading}>
+              <div>
+                <div class=" w-[200px] h-[200px] bg-blue-400 p-1 rounded-full">
+                  <div class="w-full h-full bg-white rounded-full"></div>
+                </div>
+                User :{" "}
+                {contractList()?.accountAddress.substring(0, 6) +
+                  "..." +
+                  contractList()?.accountAddress.substring(
+                    contractList()?.accountAddress.length! - 6,
+                    contractList()?.accountAddress.length!
+                  )}
+              </div>
+              <div>Status</div>
+
+              <div>
+                Total Contracts :{" "}
+                {contractList()?.forkedContracts.length! +
+                  contractList()?.ownedContracts.length!}
+              </div>
+              <div>
+                Owned Contracts : {contractList()?.ownedContracts.length!}
+              </div>
+              <div>
+                Forked Contracts : {contractList()?.forkedContracts.length!}
+              </div>
+            </Show>
+          </div>
+        </div>
+
+        <div class="col-span-7 p-4">
+          <div class="my-10">
             <A href="/upload">
               <button class={btn}>New Contract</button>
             </A>
@@ -49,57 +99,36 @@ export default function Dashboard() {
             when={!contractList.loading}
             fallback={<div>Loading the Contracts ...</div>}
           >
-            <button class=" text-blue-900 bg-blue-400 px-4 py-2 rounded-t-3xl">
-              Owned Contracts
-            </button>
-            <button class=" text-blue-900 bg-blue-400 px-4 py-2 rounded-t-3xl">
-              Forked Contracts
-            </button>
-            <div class="bg-blue-400 p-4">
-              <div class=" bg-white">
+            <div class="mt-4">
+              <button
+                class={`text-blue-600 font-medium ${
+                  owned() ? "bg-blue-100" : ""
+                } px-4 py-2 rounded-t-lg`}
+                onClick={() => setOwned(true)}
+              >
+                Owned Contracts
+              </button>
+              <button
+                class={`text-blue-600 font-medium ${
+                  !owned() ? "bg-blue-100" : ""
+                } px-4 py-2 rounded-t-lg`}
+                onClick={() => setOwned(false)}
+              >
+                Forked Contracts
+              </button>
+            </div>
+            <div class="bg-blue-100 p-4 rounded-r-lg rounded-b-lg rounded-bl-lg">
+              <div class=" bg-white rounded-xl min-h-[50vh]">
                 <Switch>
                   <Match when={owned()}>
-                    <ul>
-                      <For each={contractList()?.ownedContracts}>
-                        {(contract) => {
-                          return (
-                            <div class="m-4 bg-blue-200 rounded-lg">
-                              <A
-                                href={
-                                  "/contractInteraction/" +
-                                  contract.contractAddress
-                                }
-                                class="flex"
-                              >
-                                <button class="p-6">
-                                  {contract.contractName}
-                                </button>
-                              </A>
-                            </div>
-                          );
-                        }}
-                      </For>
-                    </ul>
+                    <RenderContracts
+                      contractList={contractList()?.ownedContracts!}
+                    />
                   </Match>
                   <Match when={!owned()}>
-                    <ul>
-                      <For each={contractList()?.forkedContracts}>
-                        {(contract) => {
-                          return (
-                            <div>
-                              <A
-                                href={
-                                  "/contractInteraction/" +
-                                  contract.contractAddress
-                                }
-                              >
-                                <button>{contract.contractName}</button>
-                              </A>
-                            </div>
-                          );
-                        }}
-                      </For>
-                    </ul>
+                    <RenderContracts
+                      contractList={contractList()?.forkedContracts!}
+                    />
                   </Match>
                 </Switch>
               </div>
@@ -110,3 +139,33 @@ export default function Dashboard() {
     </main>
   );
 }
+
+const RenderContracts: Component<{ contractList: Contract[] }> = (props) => {
+  return (
+    <div class=" text-blue-600">
+      <div class="grid grid-cols-4 p-4 font-semibold">
+        <div class=" col-span-1">Contract Name</div>
+        <div class=" col-span-2">Contract Address</div>
+      </div>
+      <div>
+        <For each={props.contractList}>
+          {(contract) => {
+            return (
+              <div class="grid grid-cols-4 p-4 items-center">
+                <div class=" col-span-1">{contract.contractName}</div>
+                <div class=" col-span-2">{contract.contractAddress}</div>
+                <div class=" col-span-1">
+                  <A href={"/contractInteraction/" + contract.contractAddress}>
+                    <button class=" text-white bg-blue-600 px-6 py-2 rounded-3xl">
+                      Open
+                    </button>
+                  </A>
+                </div>
+              </div>
+            );
+          }}
+        </For>
+      </div>
+    </div>
+  );
+};

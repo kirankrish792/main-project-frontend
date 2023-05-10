@@ -28,7 +28,7 @@ interface MethodCall {
 
 interface Contract {
   contractName: string;
-  abi: JsonInterface;
+  abi: JsonInterface[];
   contractAddress: string;
   owner: {
     accountAddress: string;
@@ -37,14 +37,13 @@ interface Contract {
   };
 }
 
-
 export default function Wrapper() {
   const { address } = useParams();
   const { account } = useUserData();
 
   const fetcher = async () => {
     if (account() == "") {
-      await getAccount()
+      await getAccount();
     }
     const res = await axios(
       import.meta.env.VITE_BASE_URL + "/contracts/" + address
@@ -68,7 +67,6 @@ const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
   console.log(contract());
 
   const { account } = useUserData();
-
 
   let inputElements: NodeListOf<HTMLInputElement>;
 
@@ -124,6 +122,8 @@ const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
       </div>
     );
   };
+
+  console.log(contract()!.abi);
 
   const setterFunctions = contract()!.abi.filter(
     (el: JsonInterface) =>

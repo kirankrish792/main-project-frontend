@@ -31,7 +31,7 @@ const NavBar: ParentComponent = (props) => {
   return (
     <nav class=" text-blue-500">
       <div class="p-5 flex justify-between">
-        <div class=" text-xl font-bold">
+        <div class=" text-xl font-bold flex items-center">
           <a href="/">ChainCloud</a>
         </div>
         <div class="flex items-center">
@@ -61,6 +61,7 @@ const NavBar: ParentComponent = (props) => {
           </button>
         </div>
       </div>
+      <div class=" h-[2px] bg-gradient-to-r from-white to-blue-50 via-blue-500"></div>
     </nav>
   );
 };
