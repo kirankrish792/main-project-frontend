@@ -98,8 +98,8 @@ const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
         <button
           onClick={handleClick}
           name={props.name}
-          class={`${
-            props.func == "getter" ? " bg-emerald-700" : " bg-orange-600"
+          class={`text-white ${
+            props.func == "getter" ? " bg-blue-600" : " bg-purple-600"
           } rounded-lg px-4 py-2 my-2`}
         >
           {props.name}
@@ -113,7 +113,7 @@ const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
                   type="text"
                   name={props.name}
                   placeholder={el.type}
-                  class=" px-1 m-2 py-3 bg-gray-800 rounded-lg"
+                  class=" px-1 m-2 py-3 outline-blue-600 border-blue-600 border-2 rounded-lg"
                 />
               </div>
             )}
@@ -140,35 +140,44 @@ const ContractInteraction: Component<{ contract: Resource<Contract> }> = (
   return (
     <main>
       <NavBar />
-      <div class="font-bold text-2xl">
+      <div class="font-bold text-2xl text-center my-10">
         <div>
-          <div>Contract Name:{props["contract"]()!.contractName}</div>
+          <div>
+            Contract Name:{" "}
+            <span class=" text-blue-500 drop-shadow-xl shadow-blue-500">
+              {props["contract"]()!.contractName}
+            </span>
+          </div>
         </div>
         <div>Contract Address : {props["contract"]()!.contractAddress}</div>
       </div>
       <div class=" lg:flex">
-        <div class="p-4">
+        <div class="p-8 rounded-xl 500 lg:mx-4">
           <div class="font-bold text-xl py-4">
             <div>User Account : {account}</div>
           </div>
           <h3 class="text-lg font-bold">Functions</h3>
           <div class="my-4">
-            <h4>Getter Function</h4>
+            <h4 class=" text-blue-600 text-lg font-medium">Getter Function</h4>
+            <hr />
             <For each={getterFunctions}>
               {(item) => <Button {...item} func="getter" />}
             </For>
           </div>
           <div class="my-4">
-            <h4>Setter Function</h4>
+            <h4 class=" text-purple-600 text-lg font-medium">
+              Setter Function
+            </h4>
+            <hr />
             <For each={setterFunctions}>
               {(item) => <Button {...item} func="setter" />}
             </For>
           </div>
           <hr />
         </div>
-        <div class=" border w-full m-4 p-4 overflow-scroll">
+        <div class=" border w-full p-4 overflow-scroll">
           <h3 class="text-xl py-4 font-bold">Output</h3>
-          <pre>{JSON.stringify(output(), null, 4)}</pre>
+          <pre class=" min-h-[200px]">{JSON.stringify(output(), null, 4)}</pre>
         </div>
       </div>
     </main>

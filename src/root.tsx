@@ -9,21 +9,16 @@ import {
   Meta,
   Routes,
   Scripts,
-  Title
+  Title,
 } from "solid-start";
 import "./root.css";
 import { ContractDataProvider, UserDataProvider } from "./store";
 
-
-
 export default function Root() {
-
-
-
   return (
     <Html lang="en">
       <Head>
-        <Title>Project WEB3</Title>
+        <Title>ChainCloud</Title>
         <Meta charset="utf-8" />
         <Meta name="viewport" content="width=device-width, initial-scale=1" />
       </Head>

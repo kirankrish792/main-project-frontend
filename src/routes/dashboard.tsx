@@ -47,7 +47,8 @@ export default function Dashboard() {
   };
   const [contractList] = createResource(fetcher);
 
-  const btn = "py-2 px-4 rounded-3xl bg-blue-600 m-2 text-white w-fit";
+  const btn =
+    "py-2 px-4 rounded-3xl bg-blue-600 m-2 text-white w-fit drop-shadow-lg";
 
   return (
     <main class="flex flex-col">
@@ -57,30 +58,40 @@ export default function Dashboard() {
         <div class=" col-span-3 flex items-center justify-center">
           <div>
             <Show when={!contractList.loading}>
-              <div>
-                <div class=" w-[200px] h-[200px] bg-blue-400 p-1 rounded-full">
-                  <div class="w-full h-full bg-white rounded-full"></div>
+              <div class=" text-center">
+                <div class=" w-[200px] h-[200px] bg-blue-400 drop-shadow-lg p-1 rounded-full">
+                  <div class="w-full h-full bg-white rounded-full">
+                    <img
+                      src="https://xsgames.co/randomusers/avatar.php?g=pixel"
+                      alt=""
+                      class=" w-full h-full rounded-full"
+                    />
+                  </div>
                 </div>
-                User :{" "}
-                {contractList()?.accountAddress.substring(0, 6) +
-                  "..." +
-                  contractList()?.accountAddress.substring(
-                    contractList()?.accountAddress.length! - 6,
-                    contractList()?.accountAddress.length!
-                  )}
-              </div>
-              <div>Status</div>
+                <div class="my-10">
+                  <div>
+                    User :{" "}
+                    {contractList()?.accountAddress.substring(0, 6) +
+                      "..." +
+                      contractList()?.accountAddress.substring(
+                        contractList()?.accountAddress.length! - 6,
+                        contractList()?.accountAddress.length!
+                      )}
+                  </div>
+                </div>
+                <div>Status</div>
 
-              <div>
-                Total Contracts :{" "}
-                {contractList()?.forkedContracts.length! +
-                  contractList()?.ownedContracts.length!}
-              </div>
-              <div>
-                Owned Contracts : {contractList()?.ownedContracts.length!}
-              </div>
-              <div>
-                Forked Contracts : {contractList()?.forkedContracts.length!}
+                <div>
+                  Total Contracts :{" "}
+                  {contractList()?.forkedContracts.length! +
+                    contractList()?.ownedContracts.length!}
+                </div>
+                <div>
+                  Owned Contracts : {contractList()?.ownedContracts.length!}
+                </div>
+                <div>
+                  Forked Contracts : {contractList()?.forkedContracts.length!}
+                </div>
               </div>
             </Show>
           </div>
